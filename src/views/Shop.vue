@@ -15,7 +15,7 @@
               <div class="swiper-slide">
                 <div class="product-card position-relative">
                   <div class="image-holder">
-                    <img :src="lentesImage" alt="Lentes de sol" class="img-fluid"> <!-- Usando variable para la imagen -->
+                    <img :src="lentesImage" alt="Lentes de sol" class="img-fluid"> 
                   </div>
                   <div class="card-detail d-flex justify-content-between align-items-baseline pt-3">
                     <h3 class="card-title text-uppercase">
@@ -25,7 +25,7 @@
                   </div>
                 </div>
               </div>
-              <!-- Agrega más productos aquí -->
+           
             </div>
           </div>
         </div>
@@ -36,18 +36,18 @@
 </template>
 
 <script>
-import lentesImage from '../assets/images/lentes1.jpg'; // Cambia la ruta aquí
+import lentesImage from '../assets/images/lentes1.jpg'; 
 
 export default {
   name: 'Shop',
   data() {
     return {
-      lentesImage, // Definimos la variable para la imagen
+      lentesImage,
     };
   },
 };
 </script>
 
 <style scoped>
-/* Estilos específicos para Shop.vue */
+
 </style>

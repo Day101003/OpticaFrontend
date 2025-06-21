@@ -2,9 +2,7 @@
   <header id="header" class="site-header header-scrolled position-fixed text-black bg-light">
     <nav id="header-nav" class="navbar navbar-expand-lg px-3 mb-3">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">
-          <img src="../assets/images/main-logo.png" class="logo" alt="Logo"> <!-- Ruta corregida -->
-        </a>
+       
         <button class="navbar-toggler d-flex d-lg-none order-3 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#bdNavbar" aria-controls="bdNavbar" aria-expanded="false" aria-label="Toggle navigation">
           <svg class="navbar-icon">
             <use xlink:href="#navbar-icon"></use>
@@ -24,6 +22,10 @@
               </li>
               <li class="nav-item">
                 <router-link class="nav-link me-4" to="/shop">Tienda</router-link>
+              </li>
+
+               <li class="nav-item">
+                <router-link class="nav-link me-4" to="/admin">Administrador</router-link>
               </li>
               <li class="nav-item">
                 <div class="user-items ps-5">
