@@ -16,6 +16,8 @@ import './assets/css/Admin/header-colors.css';
 import './assets/css/Admin/pace.min.css';
 import './assets/css/Admin/app.css';
 import '@fortawesome/fontawesome-free/css/all.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
 
 
 const app = createApp(App);
