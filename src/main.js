@@ -14,7 +14,7 @@ SwiperCore.use([Navigation, Pagination, Autoplay]);
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/css/bootstrap.min.css';
 import './assets/css/style.css';
 import './assets/css/vendor.css';

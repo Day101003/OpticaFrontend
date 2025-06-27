@@ -1,43 +1,32 @@
 <template>
   <div>
-     <div class="container mt-5">
-    <section id="billboard" class="position-relative overflow-hidden bg-light-blue">
-      <swiper
-        :loop="true"
-        :autoplay="{ delay: 5000, disableOnInteraction: false }"
-        pagination
-        navigation
-        class="main-swiper"
-      >
-        <swiper-slide v-for="(img, index) in bannerImages" :key="index">
-          <img  :src="img" alt="Banner Imagen" class="banner-image" />
-        </swiper-slide>
-      </swiper>
+    <div class="container mt-5">
+      <section id="billboard" class="position-relative overflow-hidden bg-light-blue">
+        <swiper :loop="true" :autoplay="{ delay: 5000, disableOnInteraction: false }" pagination navigation
+          class="main-swiper">
+          <swiper-slide v-for="(img, index) in bannerImages" :key="index">
+            <img :src="img" alt="Banner Imagen" class="banner-image" />
+          </swiper-slide>
+        </swiper>
 
-      <!-- Botón fijo sobre el carrusel -->
+        <!-- Botón fijo sobre el carrusel -->
 
 
-      <div class="banner-button-container">
-        <a href="/appointment" class="btn btn-medium  text-uppercase btn-rounded-none">
-          Agenda tu cita
-        </a>
-      </div>
-    </section>
+        <div class="banner-button-container">
+          <a href="/appointment" class="btn btn-medium  text-uppercase btn-rounded-none">
+            Agenda tu cita
+          </a>
+        </div>
+      </section>
     </div>
 
     <!-- Servicios de la empresa -->
     <section id="company-services" class="padding-large">
       <div class="container">
         <div class="row">
-          <div
-            class="col-lg-3 col-md-6 pb-3"
-            v-for="(service, index) in services"
-            :key="index"
-          >
-            <div
-              class="card h-100 shadow-sm text-center p-4 border-0 service-card"
-              :class="`pastel-${(index % 4) + 1}`"
-            >
+          <div class="col-lg-3 col-md-6 pb-3" v-for="(service, index) in services" :key="index">
+            <div class="card h-100 shadow-sm text-center p-4 border-0 service-card"
+              :class="`pastel-${(index % 4) + 1}`">
               <div class="mb-3">
                 <svg :class="service.icon" class="service-icon">
                   <use :xlink:href="service.iconHref" />
@@ -55,37 +44,28 @@
     <section id="productos-tarjetas" class="padding-large position-relative">
       <div class="container">
         <h2 class="display-7 text-dark text-uppercase">Lentes</h2>
-        <swiper
-          @swiper="onSwiperProductos"
-          :slides-per-view="3"
-          :space-between="20"
-          :loop="true"
-          :autoplay="{ delay: 3000 }"
-          :navigation="{
+        <swiper @swiper="onSwiperProductos" :slides-per-view="3" :space-between="20" :loop="true"
+          :autoplay="{ delay: 3000 }" :navigation="{
             nextEl: '.productos-button-next',
             prevEl: '.productos-button-prev'
-          }"
-          pagination
-          :breakpoints="{
+          }" pagination :breakpoints="{
             640: { slidesPerView: 1 },
             768: { slidesPerView: 2 },
             1024: { slidesPerView: 3 }
-          }"
-        >
+          }">
           <swiper-slide v-for="product in products" :key="product.id">
             <div class="product-card position-relative">
               <div class="image-container">
-                <img
-                  v-if="product.images && product.images.route"
-                  :src="`http://localhost:5282${product.images.route}`"
-                  class="card-img-top"
-                  alt="Imagen del producto"
-                />
+                <img v-if="product.images && product.images.route" :src="`http://localhost:5282${product.images.route}`"
+                  class="card-img-top" alt="Imagen del producto" />
                 <div class="icon-overlay">
-                  <button class="icon-btn"><i class="fas fa-heart"></i></button>
-                  <router-link :to="`/product/${product.id}`" class="icon-btn">
+                  <button class="icon-btn">
+                    <i class="fas fa-heart"></i>
+                  </button>
+
+                  <button class="icon-btn" @click="showProductDetails(product)">
                     <i class="fas fa-eye"></i>
-                  </router-link>
+                  </button>
                 </div>
               </div>
               <div class="card-body d-flex flex-column">
@@ -100,43 +80,61 @@
           </swiper-slide>
         </swiper>
         <div class="productos-button-prev custom-swiper-nav">
-          <svg width="24" height="24" fill="currentColor"><path d="M15 6l-6 6 6 6"/></svg>
+          <svg width="24" height="24" fill="currentColor">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
         </div>
         <div class="productos-button-next custom-swiper-nav">
-          <svg width="24" height="24" fill="currentColor"><path d="M9 18l6-6-6-6"/></svg>
+          <svg width="24" height="24" fill="currentColor">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- MODAL DE DETALLES -->
+      <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ selectedProduct?.name }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" v-if="selectedProduct">
+              <img v-if="selectedProduct.images?.route" :src="`http://localhost:5282${selectedProduct.images.route}`"
+                class="img-fluid mb-3 modal-img" />
+              <p><strong>Descripción:</strong> {{ selectedProduct.description }}</p>
+              <p><strong>Precio:</strong> ₡{{ selectedProduct.price?.toFixed(2) }}</p>
+              <p><strong>Código:</strong> {{ selectedProduct.code }}</p>
+              <p><strong>Estado:</strong>
+                <span :class="selectedProduct.isActive ? 'text-success' : 'text-danger'">
+                  {{ selectedProduct.isActive ? 'Activo' : 'No activo' }}
+                </span>
+              </p>
+              <p><strong>Categoría:</strong> {{ selectedProduct.categories?.name }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
+
 
     <!-- Categorías con Swiper -->
     <section id="categorias-tarjetas" class="padding-large position-relative">
       <div class="container">
         <h2 class="display-7 text-dark text-uppercase">Categorías</h2>
-        <swiper
-          @swiper="onSwiperCategorias"
-          :slides-per-view="2"
-          :space-between="20"
-          :loop="true"
-          :autoplay="{ delay: 2500 }"
-          :breakpoints="{
+        <swiper @swiper="onSwiperCategorias" :slides-per-view="2" :space-between="20" :loop="true"
+          :autoplay="{ delay: 2500 }" :breakpoints="{
             640: { slidesPerView: 2 },
             768: { slidesPerView: 3 },
             1024: { slidesPerView: 4 }
-          }"
-          :navigation="{
+          }" :navigation="{
             nextEl: '.categorias-button-next',
             prevEl: '.categorias-button-prev'
-          }"
-          pagination
-        >
+          }" pagination>
           <swiper-slide v-for="category in categories" :key="category.id">
             <div class="category-card position-relative">
-              <img
-                v-if="category.route"
-                :src="`http://localhost:5282${category.route}`"
-                class="card-img-top"
-                alt="Imagen de la categoría"
-              />
+              <img v-if="category.route" :src="`http://localhost:5282${category.route}`" class="card-img-top"
+                alt="Imagen de la categoría" />
               <div class="card-body text-center">
                 <h5 class="card-title text-dark">{{ category.name }}</h5>
               </div>
@@ -150,10 +148,14 @@
           </swiper-slide>
         </swiper>
         <div class="categorias-button-prev custom-swiper-nav">
-          <svg width="24" height="24" fill="currentColor"><path d="M15 6l-6 6 6 6"/></svg>
+          <svg width="24" height="24" fill="currentColor">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
         </div>
         <div class="categorias-button-next custom-swiper-nav">
-          <svg width="24" height="24" fill="currentColor"><path d="M9 18l6-6-6-6"/></svg>
+          <svg width="24" height="24" fill="currentColor">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
         </div>
       </div>
     </section>
@@ -166,6 +168,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import Modal from 'bootstrap/js/dist/modal'; 
 
 export default {
   name: 'Home',
@@ -188,7 +191,8 @@ export default {
       products: [],
       categories: [],
       swiperProductos: null,
-      swiperCategorias: null
+      swiperCategorias: null,
+      selectedProduct: null
     };
   },
   mounted() {
@@ -221,13 +225,19 @@ export default {
     },
     onSwiperCategorias(swiper) {
       this.swiperCategorias = swiper;
+    },
+    showProductDetails(product) {
+      this.selectedProduct = product;
+      const modal = new Modal(document.getElementById('productModal'));
+      modal.show();
     }
   }
 };
 </script>
 
 
-<style scoped>@import 'swiper/swiper-bundle.css';
+<style scoped>
+@import 'swiper/swiper-bundle.css';
 
 /* Banner */
 #billboard {
@@ -259,7 +269,7 @@ export default {
   text-transform: uppercase;
   border-radius: 0.375rem;
   transition: background-color 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .banner-button-container .btn:hover {
@@ -327,7 +337,7 @@ export default {
   overflow: hidden;
   background: linear-gradient(145deg, #f5f9ff, #ffffff);
   border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
@@ -342,7 +352,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color:#ecf3f8;
+  background-color: #ecf3f8;
 }
 
 .image-container img {
@@ -407,7 +417,7 @@ export default {
   border: none;
   border-radius: 50%;
   padding: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.15);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -432,14 +442,14 @@ export default {
   align-items: stretch;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .category-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .category-card img {
@@ -478,7 +488,7 @@ export default {
 
 .service-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .service-icon {
@@ -491,12 +501,15 @@ export default {
 .pastel-1 {
   background-color: #6dd0a7;
 }
+
 .pastel-2 {
   background-color: #38b5b2;
 }
+
 .pastel-3 {
   background-color: #6dd0a7;
 }
+
 .pastel-4 {
   background-color: #38b5b2;
 }
@@ -509,5 +522,13 @@ export default {
   z-index: 5;
 }
 
-
+/*Modal detalles*/
+.modal-img {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>
