@@ -3,7 +3,7 @@
     <div class="card w-50">
       <div class="card-body p-4">
         <h5 class="card-title text-center">Agendar Cita</h5>
-        <hr />
+        <hr/>
         
         <!-- Barra de Progreso -->
         <div class="step-indicator">

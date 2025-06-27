@@ -27,9 +27,9 @@
             <h5 class="card-title">{{ product.name }}</h5>
             <p class="card-text text-muted mb-1">Código: {{ product.code }}</p>
             <p class="card-text text-muted mb-1">₡{{ product.price.toFixed(2) }}</p>
-            <span class="badge" :class="product.isActive ? 'bg-success' : 'bg-secondary'">
-              {{ product.isActive ? 'Activo' : 'No activo' }}
-            </span>
+            <span class="product-badge mx-auto" :class="product.isActive ? 'bg-success' : 'bg-secondary'">
+                  {{ product.isActive ? 'Activo' : 'No activo' }}
+                </span>
           </div>
         </div>
       </div>

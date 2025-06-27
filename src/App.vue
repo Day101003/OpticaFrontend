@@ -1,8 +1,9 @@
 <template>
   <div id="app">
-    <Header />
+   <Header v-if="showHeaderFooter" />
     <router-view />
-    <Footer />
+    <Footer v-if="$route.path === '/'" />
+
   </div>
 </template>
 
@@ -22,10 +23,20 @@ import '@fortawesome/fontawesome-free/css/all.css';
 export default {
   components: {
     Header,
+    Footer
   },
+  computed: {
+    showHeaderFooter() {
+      return this.$route.path === '/' || this.$route.path.startsWith('/category/') ||
+           this.$route.path === '/shop';  // <-- agregar esta línea 
+    }
+  }
 };
+
 </script>
 
 <style>
-/* Estilos globales aquí */
+body {
+  padding-top: 0.1rem; /* mismo valor que el alto del navbar */
+}
 </style>
