@@ -21,7 +21,7 @@
             <li @click="navigate('productos')"><a href="#"><i class="fas fa-box"></i> Productos</a></li>
             <li @click="navigate('categorias')"><a href="#"><i class="fas fa-tags"></i> Categorías</a></li>
             <li @click="navigate('imagenes')"><a href="#"><i class="fas fa-image"></i> Imágenes</a></li>
-            <li @click="navigate('usuarios')"><a href="#"><i class="fas fa-users"></i> Usuarios</a></li>
+            <li @click="navigate('usuariosForm')"><a href="#"><i class="fas fa-users"></i> Usuarios</a></li>
             <li @click="navigate('disponibilidad')"><a href="#"><i class="fas fa-calendar-check"></i> Disponibilidad</a></li>
             <li @click="navigate('citas')"><a href="#"><i class="fas fa-calendar-alt"></i> Citas</a></li>
           </ul>
@@ -35,7 +35,7 @@
         <h1>Admin Dashboard</h1>
         <p>Bienvenido al panel de administración.</p>
 
-        <!-- Secciones renderizadas dinámicamente -->
+        <!-- Secciones dinámicas -->
         <div v-if="currentForm === 'productos'">
           <ProductForm @view-products="showForm('listaProductos')" />
         </div>
@@ -66,9 +66,25 @@
           <EditImage :imageId="editingImageId" @image-updated="showForm('listImages')" @cancel-edit="showForm('listImages')" />
         </div>
 
-        <div v-if="currentForm === 'usuarios'">
-          <UserForm />
+        <!-- Usuarios separados: formulario y lista y edición -->
+        <div v-if="currentForm === 'usuariosForm'">
+          <UserForm @user-saved="onUserSaved" @view-users="showForm('usuariosList')" />
+          <button class="btn btn-secondary mt-2" @click="showForm('usuariosList')">Ver Lista de Usuarios</button>
         </div>
+
+        <div v-if="currentForm === 'usuariosList'">
+          <button class="btn btn-primary mb-3" @click="newUser">Agregar Nuevo Usuario</button>
+          <UserList ref="userList" @edit-user="editUser" />
+        </div>
+
+        <div v-if="currentForm === 'editarUsuario' && editingUserId !== null">
+          <EditUser 
+            :userId="editingUserId" 
+            @user-updated="onUserSaved" 
+            @cancel-edit="showForm('usuariosList')" 
+          />
+        </div>
+
         <div v-if="currentForm === 'disponibilidad'">
           <AvailabilityForm />
         </div>
@@ -79,7 +95,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import ProductForm from './ProductForm.vue';
@@ -92,6 +107,8 @@ import ImageForm from './ImageForm.vue';
 import ImageList from './ImageList.vue';
 import EditImage from './EditImage.vue';
 import UserForm from './UserForm.vue';
+import UserList from './UserList.vue';
+import EditUser from './EditUser.vue';
 import AvailabilityForm from './AvailabilityForm.vue';
 import QuotesTable from './QuotesTable.vue';
 
@@ -108,16 +125,19 @@ export default {
     ImageList,
     EditImage,
     UserForm,
+    UserList,
+    EditUser,
     AvailabilityForm,
     QuotesTable,
   },
   data() {
     return {
-      currentForm: 'categorias',
+      currentForm: 'usuariosForm', // inicia mostrando formulario crear usuario
       editingProductId: null,
       editingCategoryId: null,
       editingImageId: null,
-      sidebarVisible: window.innerWidth >= 992, // visible en desktop
+      editingUserId: null,
+      sidebarVisible: window.innerWidth >= 992
     };
   },
   methods: {
@@ -127,27 +147,43 @@ export default {
     navigate(formName) {
       this.showForm(formName);
       if (window.innerWidth < 992) {
-        this.sidebarVisible = false; // Oculta el menú al hacer clic en móvil
+        this.sidebarVisible = false;
       }
     },
-    showForm(formName, id = null) {
+    showForm(formName) {
       this.currentForm = formName;
-
-      this.editingProductId = formName === 'editarProducto' ? id : null;
-      this.editingCategoryId = formName === 'editCategory' ? id : null;
-      this.editingImageId = formName === 'editImage' ? id : null;
+      // Resetea ids para editar al cambiar de formulario
+      if (formName !== 'editarProducto') this.editingProductId = null;
+      if (formName !== 'editCategory') this.editingCategoryId = null;
+      if (formName !== 'editImage') this.editingImageId = null;
+      if (formName !== 'editarUsuario') this.editingUserId = null;
     },
     editProduct(id) {
-      this.showForm('editarProducto', id);
+      this.editingProductId = id;
+      this.showForm('editarProducto');
     },
     editCategory(id) {
-      this.showForm('editCategory', id);
+      this.editingCategoryId = id;
+      this.showForm('editCategory');
     },
     editImage(id) {
-      this.showForm('editImage', id);
+      this.editingImageId = id;
+      this.showForm('editImage');
+    },
+    newUser() {
+      this.editingUserId = null;
+      this.showForm('usuariosForm');
+    },
+    editUser(user) {
+      this.editingUserId = user.id;
+      this.showForm('editarUsuario');
+    },
+    onUserSaved() {
+      this.editingUserId = null;
+      this.showForm('usuariosList');
+      if (this.$refs.userList) this.$refs.userList.fetchUsers();
     },
     handleResize() {
-      // si pasa a escritorio, se asegura que se vea
       this.sidebarVisible = window.innerWidth >= 992;
     }
   },
@@ -159,7 +195,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
 .wrapper {
@@ -221,7 +256,6 @@ export default {
   font-size: 18px;
 }
 
-/* Mostrar hamburguesa solo en pantallas pequeñas */
 @media (max-width: 991px) {
   .btn-toggle-sidebar {
     display: block;
@@ -239,8 +273,6 @@ export default {
   }
 }
 
-
-/* Desktop: sidebar ocupa espacio fijo */
 @media (min-width: 992px) {
   .wrapper {
     flex-direction: row;
@@ -256,6 +288,4 @@ export default {
     padding-left: 100px;
   }
 }
-
-
 </style>
