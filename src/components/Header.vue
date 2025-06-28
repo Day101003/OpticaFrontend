@@ -31,7 +31,9 @@
             <li class="nav-item">
               <router-link class="nav-link me-3" to="/shop">Tienda</router-link>
             </li>
-            <li class="nav-item">
+
+            <!-- BOTÓN ADMINISTRADOR SOLO PARA ADMIN -->
+            <li v-if="isAdmin" class="nav-item">
               <router-link class="nav-link me-3" to="/admin">Administrador</router-link>
             </li>
 
@@ -58,7 +60,6 @@
   </header>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import { jwtDecode } from 'jwt-decode'
@@ -72,6 +73,7 @@ const removeToken = () => localStorage.removeItem('Token')
 
 const router = useRouter()
 const loggedIn = ref(false)
+const isAdmin = ref(false)  // Nueva variable para verificar si el usuario es admin
 const userData = ref({})
 const userImage = ref('/assets/img/FotoPerfil/default.jpg') // Imagen por defecto
 
@@ -89,11 +91,15 @@ const loadUserData = async () => {
     const id = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
     const name = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
     const email = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+    const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
 
     if (!id) throw new Error('Token sin ID')
 
     userData.value = { id, name, email }
     loggedIn.value = true
+
+    // Verifica si el rol del usuario es "Admin"
+    isAdmin.value = role === 'Admin'
 
     const response = await axios.get(`http://localhost:5282/api/users/${id}`)
     const user = response.data
@@ -119,6 +125,7 @@ eventBus.on('authChanged', () => {
 const logout = () => {
   removeToken()
   loggedIn.value = false
+  isAdmin.value = false  // Resetea el estado de admin al hacer logout
   userData.value = {}
   userImage.value = '/assets/img/FotoPerfil/default.jpg'
   eventBus.emit('authChanged')
@@ -135,14 +142,10 @@ img.rounded-circle {
   max-height: none;
 }
 
-
 @media (max-width: 991px) {
   .navbar-collapse {
     background-color: #f8f9fa; /* fondo del menú desplegado en móvil */
     padding: 1rem;
   }
 }
-
-
-
 </style>

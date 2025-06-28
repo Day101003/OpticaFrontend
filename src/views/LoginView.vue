@@ -70,9 +70,13 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     })
+
+    // Guardamos el token y el rol en localStorage
     localStorage.setItem('Token', response.data.token)
-    eventBus.emit('authChanged')
-    router.push('/')
+    localStorage.setItem('user_role', response.data.role)  // Guardar el rol también
+
+    eventBus.emit('authChanged')  // Notificar a la app sobre el cambio de autenticación
+    router.push('/')  // Redirigir a la página de inicio o donde sea necesario
   } catch (err) {
     alert('Credenciales inválidas')
     console.error(err)
