@@ -92,29 +92,53 @@
       </div>
 
       <!-- MODAL DE DETALLES -->
-      <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">{{ selectedProduct?.name }}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body" v-if="selectedProduct">
-              <img v-if="selectedProduct.images?.route" :src="`http://localhost:5282${selectedProduct.images.route}`"
-                class="img-fluid mb-3 modal-img" />
-              <p><strong>Descripción:</strong> {{ selectedProduct.description }}</p>
-              <p><strong>Precio:</strong> ₡{{ selectedProduct.price?.toFixed(2) }}</p>
-              <p><strong>Código:</strong> {{ selectedProduct.code }}</p>
-              <p><strong>Estado:</strong>
-                <span :class="selectedProduct.isActive ? 'text-success' : 'text-danger'">
-                  {{ selectedProduct.isActive ? 'Activo' : 'No activo' }}
-                </span>
-              </p>
-              <p><strong>Categoría:</strong> {{ selectedProduct.categories?.name }}</p>
-            </div>
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ selectedProduct?.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" v-if="selectedProduct">
+        <div class="row">
+          <!-- Imagen a la izquierda -->
+          <div class="col-md-5 d-flex align-items-center justify-content-center mb-3 mb-md-0">
+            <img
+              v-if="selectedProduct.images?.route"
+              :src="`http://localhost:5282${selectedProduct.images.route}`"
+              class="img-fluid zoomable-image"
+              alt="Imagen del producto"
+            />
+          </div>
+
+          <!-- Detalles a la derecha -->
+          <div class="col-md-7">
+            <p><strong>Descripción:</strong> {{ selectedProduct.description || 'Sin descripción' }}</p>
+            <p><strong>Precio:</strong> ₡{{ selectedProduct.price?.toFixed(2) }}</p>
+            <p><strong>Código:</strong> {{ selectedProduct.code }}</p>
+            <p><strong>Estado:</strong>
+              <span :class="selectedProduct.isActive ? 'text-success' : 'text-danger'">
+                {{ selectedProduct.isActive ? 'Activo' : 'No activo' }}
+              </span>
+            </p>
+            <p><strong>Categoría:</strong> {{ selectedProduct.categories?.name || 'Sin categoría' }}</p>
+
+            <!-- Botón de WhatsApp -->
+            <a
+              :href="`https://wa.me/50684481408?text=Hola,%20estoy%20interesado%20en%20el%20producto%20${encodeURIComponent(selectedProduct.name)}`"
+              target="_blank"
+              class="btn btn-success mt-3"
+            >
+              <i class="fab fa-whatsapp me-2"></i> Consultar por WhatsApp
+            </a>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+
     </section>
 
 
@@ -168,7 +192,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import Modal from 'bootstrap/js/dist/modal'; 
+import Modal from 'bootstrap/js/dist/modal';
 
 export default {
   name: 'Home',
@@ -183,10 +207,30 @@ export default {
         'assets/img/Fondos/2.svg'
       ],
       services: [
-        { title: 'Ver más productos', description: 'Lentes de todo tipo', icon: 'cart-outline', iconHref: '#cart-outline' },
-        { title: 'Paquetes visión', description: 'Mira todos los paquetes que tenemos para ti', icon: 'quality', iconHref: '#quality' },
-        { title: '2x1', description: 'Escoge tu aro favorito con nosotros', icon: 'price-tag', iconHref: '#price-tag' },
-        { title: '100% seguro con nuestra óptica', description: 'Puedes confiar en nosotros y en nuestro personal', icon: 'shield-plus', iconHref: '#shield-plus' }
+        {
+          title: 'Ver más productos',
+          description: 'Lentes de todo tipo',
+          icon: 'cart-outline',
+          iconHref: '#cart-outline'
+        },
+        {
+          title: 'Paquetes visión',
+          description: 'Mira todos los paquetes que tenemos para ti',
+          icon: 'quality',
+          iconHref: '#quality'
+        },
+        {
+          title: '2x1',
+          description: 'Escoge tu aro favorito con nosotros',
+          icon: 'price-tag',
+          iconHref: '#price-tag'
+        },
+        {
+          title: '100% seguro con nuestra óptica',
+          description: 'Puedes confiar en nosotros y en nuestro personal',
+          icon: 'shield-plus',
+          iconHref: '#shield-plus'
+        }
       ],
       products: [],
       categories: [],
@@ -228,12 +272,15 @@ export default {
     },
     showProductDetails(product) {
       this.selectedProduct = product;
-      const modal = new Modal(document.getElementById('productModal'));
-      modal.show();
+      this.$nextTick(() => {
+        const modal = new Modal(document.getElementById('productModal'));
+        modal.show();
+      });
     }
   }
 };
 </script>
+
 
 
 <style scoped>
@@ -373,7 +420,7 @@ export default {
 .card-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #14409e;
+  color: #256f7c;
   margin-bottom: 0.3rem;
   text-align: center;
 }
@@ -396,7 +443,7 @@ export default {
   margin-top: 0.5rem;
 }
 
-/* Íconos superpuestos */
+
 .icon-overlay {
   position: absolute;
   top: 10px;
@@ -522,13 +569,38 @@ export default {
   z-index: 5;
 }
 
-/*Modal detalles*/
-.modal-img {
+/*Modal detalles*/   
+ .modal-img { 
   max-width: 300px;
-  width: 100%;
-  height: auto;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
+   width: 100%; 
+   height: auto; 
+   display: block;
+    margin-left: auto; 
+    margin-right: auto; } 
+    .zoomable-image { transition: transform 0.3s ease;
+       cursor: zoom-in; 
+      } 
+       .zoomable-image:hover { 
+        transform: scale(1.1); 
+        z-index: 100; } 
+         .modal-img {
+           max-width: 300px;
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            margin-left: auto;
+             margin-right: auto;
+             } 
+             .modal-title {     
+              font-size: 1.8rem;
+               font-weight: 600; 
+               color: #247375;
+                /* Color azul de ejemplo, puedes cambiarlo */
+                 text-align: center; margin-bottom: 
+                 1rem; transition: color 0.3s ease;
+                 }
+
+              .modal-title:hover {
+                 color: #2a6a7a;  
+                 }
 </style>

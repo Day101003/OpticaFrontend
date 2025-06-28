@@ -28,7 +28,7 @@ export default {
   computed: {
     showHeaderFooter() {
       return this.$route.path === '/' || this.$route.path.startsWith('/category/') ||
-           this.$route.path === '/shop';  // <-- agregar esta línea 
+           this.$route.path === '/shop';  
     }
   }
 };
@@ -37,6 +37,6 @@ export default {
 
 <style>
 body {
-  padding-top: 0.1rem; /* mismo valor que el alto del navbar */
+  padding-top: 0.1rem; 
 }
 </style>
