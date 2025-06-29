@@ -112,7 +112,7 @@ export default {
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s;
-  background-color: rgba(255, 255, 255, 0.8); 
+  background-color: rgba(255, 255, 255, 0.333); 
 }
 
 .card:hover .overlay {

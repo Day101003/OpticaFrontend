@@ -134,6 +134,11 @@ const logout = () => {
 </script>
 
 <style scoped>
+
+.site-header {
+  z-index: 1030 !important; 
+}
+
 img.rounded-circle {
   object-fit: cover;
 }

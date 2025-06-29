@@ -5,7 +5,7 @@
         <!-- Columna 1: Logo y redes -->
         <div class="col-lg-4 col-md-6">
            <img src="../assets/images/logo1.png" class="logo-icon" alt="logo icon" />
-          <p class="mt-3 text-muted small" >Tu salud visual es nuestra prioridad. ¡Contáctanos para más información!</p>
+          <p class="mt-3 small" >Tu salud visual es nuestra prioridad. ¡Contáctanos para más información!</p>
           <div class="d-flex gap-3 mt-2" style="color: aliceblue;">
             <a href="#"><svg class="icon"><use xlink:href="#facebook" /></svg></a>
             <a href="#"><svg class="icon"><use xlink:href="#instagram" /></svg></a>
@@ -36,7 +36,7 @@
 
       <!-- Parte inferior -->
       <div class="row justify-content-between align-items-center">
-        <div class="col-md-6 small text-muted" style="color: aliceblue;">
+        <div class="col-md-6 small" style="color: aliceblue;">
           © 2025 OptiView. Todos los derechos reservados.
         </div>
         <div class="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
@@ -70,6 +70,7 @@ export default {
 
 <style scoped>
 footer {
+  color: #f8f9fa; 
   font-size: 0.95rem;
 }
 

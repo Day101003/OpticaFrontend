@@ -27,9 +27,12 @@
             <h5 class="card-title">{{ product.name }}</h5>
             <p class="card-text text-muted mb-1">Código: {{ product.code }}</p>
             <p class="card-text text-muted mb-1">₡{{ product.price.toFixed(2) }}</p>
-            <span class="product-badge mx-auto" :class="product.isActive ? 'bg-success' : 'bg-secondary'">
-                  {{ product.isActive ? 'Activo' : 'No activo' }}
-                </span>
+          <span
+  class="product-badge mx-auto"
+  :class="product.isActive ? 'active' : 'inactive'"
+>
+  {{ product.isActive ? 'Activo' : 'No activo' }}
+</span>
           </div>
         </div>
       </div>
@@ -116,7 +119,7 @@ export default {
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s;
-  background-color: rgba(255, 255, 255, 0.8); 
+  background-color: rgba(255, 255, 255, 0.227); 
 }
 
 .card:hover .overlay {
@@ -127,4 +130,26 @@ export default {
   margin: 0 5px; 
   font-size: 0.8rem;
 }
+
+.product-badge {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 999px; 
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.product-badge.active {
+  background-color: #4caf50;
+}
+
+.product-badge.inactive {
+  background-color: #adb5bd;
+}
+
+.product-badge:hover {
+  background-color: #66bb6a; 
+}
+
 </style>

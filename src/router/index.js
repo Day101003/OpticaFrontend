@@ -9,6 +9,7 @@ import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import ProductsByCategory from '../views/ProductsByCategory.vue';
 import AccessDenied from '../views/AccessDenied.vue'; // Nueva vista para acceso denegado
+import ProductForm from '../views/ProductForm.vue';
 
 // Función para decodificar el JWT usando atob()
 function decodeJwt(token) {
@@ -57,7 +58,8 @@ const routes = [
     name: 'ProductsByCategory',
     component: ProductsByCategory
   },
-  { path: '/access-denied', name: 'access-denied', component: AccessDenied },  // Ruta para AccessDenied
+  { path: '/access-denied', name: 'access-denied', component: AccessDenied },  
+  
 ];
 
 const router = createRouter({
