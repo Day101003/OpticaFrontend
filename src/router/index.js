@@ -8,7 +8,7 @@ import AppointmentForm from '../views/AppointmentForm.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import ProductsByCategory from '../views/ProductsByCategory.vue';
-import AccessDenied from '../views/AccessDenied.vue';
+
 
 const routes = [
   { path: '/', component: Home },
@@ -52,7 +52,7 @@ const routes = [
     name: 'ProductsByCategory',
     component: ProductsByCategory,
   },
-  { path: '/access-denied', name: 'access-denied', component: AccessDenied },
+
 ];
 
 const router = createRouter({

@@ -91,14 +91,21 @@
         </div>
       </div>
 
-      <!-- MODAL DE DETALLES -->
+     <!-- MODAL DE DETALLES -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content position-relative">
+      
+      <!-- Ícono de corazón en la esquina superior derecha -->
+      <button class="favorite-icon" @click="toggleFavorite">
+        <i :class="isFavorite ? 'fas fa-heart text-danger' : 'far fa-heart text-secondary'"></i>
+      </button>
+
       <div class="modal-header">
         <h5 class="modal-title">{{ selectedProduct?.name }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body" v-if="selectedProduct">
         <div class="row">
           <!-- Imagen a la izquierda -->
@@ -236,7 +243,8 @@ export default {
       categories: [],
       swiperProductos: null,
       swiperCategorias: null,
-      selectedProduct: null
+      selectedProduct: null,
+      isFavorite: false
     };
   },
   mounted() {
@@ -272,14 +280,21 @@ export default {
     },
     showProductDetails(product) {
       this.selectedProduct = product;
+      this.isFavorite = false; // Reinicia el estado de favorito al abrir otro producto
       this.$nextTick(() => {
         const modal = new Modal(document.getElementById('productModal'));
         modal.show();
       });
+    },
+    toggleFavorite() {
+      this.isFavorite = !this.isFavorite;
+      console.log('Favorito:', this.selectedProduct?.name, this.isFavorite);
+      // Aquí puedes agregar lógica para guardar en localStorage o backend si lo deseas
     }
   }
 };
 </script>
+
 
 
 
@@ -305,7 +320,7 @@ export default {
   top: 50%;
   left: 5%;
   transform: translateY(-50%);
-  z-index: 20;
+  z-index: 5;
 }
 
 .banner-button-container .btn {
@@ -595,7 +610,6 @@ export default {
               font-size: 1.8rem;
                font-weight: 600; 
                color: #247375;
-                /* Color azul de ejemplo, puedes cambiarlo */
                  text-align: center; margin-bottom: 
                  1rem; transition: color 0.3s ease;
                  }
@@ -603,4 +617,28 @@ export default {
               .modal-title:hover {
                  color: #2a6a7a;  
                  }
+
+                 .favorite-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.2s ease;
+}
+
+.favorite-icon:hover {
+  transform: scale(1.1);
+}
+
+.favorite-icon i {
+  color: #dc3545;
+}
+
 </style>
