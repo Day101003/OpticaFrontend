@@ -10,6 +10,11 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fullcalendar/core": "^6.1.17",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
+    "@fullcalendar/vue3": "^6.1.17",
     "@popperjs/core": "^2.11.8",
     "axios": "^1.10.0",
     "bootstrap": "^5.3.7",
@@ -25,5 +30,4 @@
     "@vitejs/plugin-vue": "^5.2.3",
     "vite": "^6.3.5"
   }
-  
 }
