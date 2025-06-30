@@ -301,12 +301,12 @@ export default {
           await this.fetchQuotes();
         }
 
-        // Redirigir
-        if (this.isEditing && this.isAdmin) {
-          this.$router.push('/admin');
-        } else {
-          this.$router.push('/appointment');
-        }
+      // Redirigir
+        if (this.isAdmin) {
+  this.$router.push('/admin');
+} else {
+  this.$router.push('/appointment');
+}
       } catch (error) {
         this.error = error.response?.data?.message || 'Error al guardar la cita';
         console.error('Error en submitForm:', error);
