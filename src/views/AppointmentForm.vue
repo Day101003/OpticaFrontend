@@ -2,7 +2,7 @@
   <div class="container d-flex justify-content-center align-items-center vh-100">
     <div class="card w-75">
       <div class="card-body p-4">
-        <h5 class="card-title text-center">{{ isEditing ? 'Editar Cita' : 'Agendar Cita' }}</h5>
+        <h5 class="card-title  text-center text-dark fw-bold ">{{ isEditing ? 'Editar Cita' : 'Agendar Cita' }}</h5>
         <hr />
         <!-- Barra de Progreso (solo para creación, no para edición) -->
         <div v-if="!isEditing" class="step-indicator">
@@ -11,54 +11,72 @@
           <div :class="['step', { active: step === 3 }]">3</div>
         </div>
         <!-- Paso 1: Autenticación o Datos del Cliente (solo para creación) -->
-        <div v-if="!isEditing && step === 1">
-          <h6>Información del Cliente</h6>
-          <div v-if="!isLoggedIn">
-            <p>¿Ya tienes una cuenta?</p>
-            <button class="btn btn-primary mr-2" @click="goToLogin">Iniciar Sesión</button>
-            <button class="btn btn-secondary" @click="continueAsGuest">Continuar como Cliente</button>
-          </div>
- ♥
-          <form v-if="isLoggedIn || isGuest" class="mt-3" @submit.prevent="nextStep">
-            <div class="mb-3">
-              <label for="inputName" class="form-label">Nombre</label>
-              <input
-                type="text"
-                class="form-control"
-                id="inputName"
-                v-model="form.clientName"
-                placeholder="Ingrese su nombre"
-                :disabled="isLoggedIn"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="inputEmail" class="form-label">Correo Electrónico</label>
-              <input
-                type="email"
-                class="form-control"
-                id="inputEmail"
-                v-model="form.clientEmail"
-                placeholder="Ingrese su correo electrónico"
-                :disabled="isLoggedIn"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="inputPhone" class="form-label">Teléfono</label>
-              <input
-                type="tel"
-                class="form-control"
-                id="inputPhone"
-                v-model="form.clientPhone"
-                placeholder="Ingrese su teléfono"
-                :disabled="isLoggedIn"
-                required
-              />
-            </div>
-            <button class="btn btn-primary" type="submit">Siguiente</button>
-          </form>
-        </div>
+        <div v-if="!isEditing && step === 1" class="p-4 bg-white rounded shadow-sm border">
+  <h5 class="mb-4 text-center text-dark fw-bold border-bottom pb-2">
+    Información del Cliente
+  </h5>
+
+  <div v-if="!isLoggedIn" class="mb-4 text-center">
+    <p class="mb-2">¿Ya tienes una cuenta?</p>
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
+      <button class="btn btn-primary" @click="goToLogin">
+        Iniciar Sesión
+      </button>
+      <button class="btn btn-primary " @click="continueAsGuest">
+        Continuar como Cliente
+      </button>
+    </div>
+  </div>
+
+  <form v-if="isLoggedIn || isGuest" class="mt-3" @submit.prevent="nextStep">
+    <div class="mb-3">
+      <label for="inputName" class="form-label">👤 Nombre</label>
+      <input
+        type="text"
+        class="form-control"
+        id="inputName"
+        v-model="form.clientName"
+        placeholder="Ingrese su nombre"
+        :disabled="isLoggedIn"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="inputEmail" class="form-label">📧 Correo Electrónico</label>
+      <input
+        type="email"
+        class="form-control"
+        id="inputEmail"
+        v-model="form.clientEmail"
+        placeholder="Ingrese su correo electrónico"
+        :disabled="isLoggedIn"
+        required
+      />
+    </div>
+
+    <div class="mb-4">
+      <label for="inputPhone" class="form-label">📱 Teléfono</label>
+      <input
+        type="tel"
+        class="form-control"
+        id="inputPhone"
+        v-model="form.clientPhone"
+        placeholder="Ingrese su teléfono"
+        :disabled="isLoggedIn"
+        required
+      />
+    </div>
+
+    <div class="text-center">
+      <button class="btn btn-primary px-4" type="submit">
+        Siguiente 
+      </button>
+    </div>
+  </form>
+</div>
+
+
         <!-- Paso 2 o Formulario de Edición: Selección de Fecha y Hora + Mis Citas -->
         <div v-else-if="!isEditing && step === 2 || isEditing">
           <h6>{{ isEditing ? 'Editar Fecha y Hora' : 'Seleccionar Fecha y Hora' }}</h6>
@@ -99,16 +117,25 @@
           </div>
         </div>
         <!-- Paso 3: Confirmación (solo para creación) -->
-        <div v-else-if="!isEditing && step === 3">
-          <h6>Confirmación de Cita</h6>
-          <p>
-            Su cita ha sido agendada para el día:
-            <strong>{{ selectedDateTime ? formatDateTime(selectedDateTime) : 'N/A' }}</strong>
-          </p>
-          <button class="btn btn-primary" @click="submitForm">Confirmar y Guardar</button>
-          <button class="btn btn-secondary mr-2" @click="prevStep">Anterior</button>
-          <p v-if="error" class="text-danger">{{ error }}</p>
-        </div>
+      <div v-else-if="!isEditing && step === 3">
+  <div class="alert alert-success text-center">
+    <h6 class="mb-2">Confirmación de Cita</h6>
+    <p class="mb-0">
+      Su cita ha sido agendada para el día:
+      <strong>{{ selectedDateTime ? formatDateTime(selectedDateTime) : 'N/A' }}</strong>
+    </p>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-3">
+    <button class="btn btn-secondary" @click="prevStep">Anterior</button>
+    <button class="btn btn-primary" @click="submitForm">Confirmar y Guardar</button>
+  </div>
+
+  <p v-if="error" class="text-danger mt-2">{{ error }}</p>
+</div>
+
+
+
       </div>
     </div>
   </div>
@@ -147,14 +174,14 @@ export default {
       isAdmin: false,
       calendarOptions: {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-        initialView: 'timeGridDay',
+        initialView: 'timeGridWeek', // Cambiado a vista semanal
         events: [],
         selectable: true,
         select: this.handleDateSelect,
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
-          right: 'timeGridDay',
+          right: 'timeGridWeek,timeGridDay', // Agregar opción para alternar vistas
         },
         slotMinTime: '07:00:00',
         slotMaxTime: '19:00:00',
@@ -202,8 +229,34 @@ export default {
     async fetchAvailableSlots() {
       try {
         const now = new Date();
-        const response = await axios.get(`/Availabilities/available/${now.getFullYear()}/${now.getMonth() + 1}`);
-        this.availableSlots = response.data;
+        const endDate = new Date(now);
+        endDate.setDate(now.getDate() + 10); // Próximos 10 días
+
+        const slots = [];
+        // Obtener meses necesarios (máximo 2 meses si cruza el límite de mes)
+        const startYear = now.getFullYear();
+        const startMonth = now.getMonth() + 1;
+        const endYear = endDate.getFullYear();
+        const endMonth = endDate.getMonth() + 1;
+
+        // Solicitar horarios para el mes actual
+        const response1 = await axios.get(`/Availabilities/available/${startYear}/${startMonth}`);
+        slots.push(...response1.data);
+
+        // Si el rango incluye el próximo mes, hacer otra solicitud
+        if (startMonth !== endMonth || startYear !== endYear) {
+          const response2 = await axios.get(`/Availabilities/available/${endYear}/${endMonth}`);
+          slots.push(...response2.data);
+        }
+
+        // Filtrar slots para los próximos 10 días
+        this.availableSlots = slots.filter(slot => {
+          const slotDate = new Date(slot.availableDate.split('T')[0]);
+          return slotDate >= now && slotDate <= endDate;
+        });
+
+        console.log('Horarios disponibles:', this.availableSlots);
+
         this.calendarOptions.events = this.availableSlots.map(slot => ({
           id: slot.id,
           start: `${slot.availableDate.split('T')[0]}T${slot.hour}`,
@@ -211,6 +264,7 @@ export default {
           backgroundColor: '#28a745',
           extendedProps: { availabilityId: slot.id },
         }));
+
         if (this.availableSlots.length > 0) {
           this.calendarOptions.initialDate = this.availableSlots[0].availableDate.split('T')[0];
         }
@@ -301,12 +355,12 @@ export default {
           await this.fetchQuotes();
         }
 
-      // Redirigir
+        // Redirigir
         if (this.isAdmin) {
-  this.$router.push('/admin');
-} else {
-  this.$router.push('/appointment');
-}
+          this.$router.push('/admin');
+        } else {
+          this.$router.push('/appointment');
+        }
       } catch (error) {
         this.error = error.response?.data?.message || 'Error al guardar la cita';
         console.error('Error en submitForm:', error);
@@ -437,4 +491,68 @@ export default {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+/* Estilos modernos para FullCalendar - usando ::deep() para scoped */
+:deep(.fc) {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+:deep(.fc-toolbar-title) {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #343a40;
+}
+
+:deep(.fc-daygrid-day-number),
+:deep(.fc-timegrid-slot-label),
+:deep(.fc-col-header-cell-cushion) {
+  color: #000 !important; /* ⬅️ Cambiar azul a negro */
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+:deep(.fc-button:hover) {
+  background-color: #9a9ea5 !important;
+}
+
+:deep(.fc-daygrid-day-number),
+:deep(.fc-timegrid-slot-label) {
+  color: #495057;
+}
+
+:deep(.fc-event) {
+  background-color: #3a6298 !important;
+  border: none !important;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+:deep(.fc-event-selected),
+:deep(.fc-event:focus) {
+  outline: 2px solid #0d6efd;
+}
+
+:deep(.fc-timegrid-slot) {
+  background-color: #ffffff !important;
+}
+:deep(.fc-event) {
+  white-space: normal !important; /* Permitir que el texto se expanda a varias líneas */
+  overflow: visible !important;
+  min-height: 2.5em !important; /* Aumentar la altura mínima de los eventos */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+:deep(.fc-timegrid-slot) {
+  height: 50px !important; /* ⬅️ Altura entre filas */
+}
+
+:deep(.fc-timegrid-col) {
+  min-width: 110px !important; /* ⬅️ Aumenta el ancho de cada columna del día */
+}
+
 </style>
