@@ -1,87 +1,81 @@
 <template>
-  <section class="login-section">
-    <!-- Imagen de fondo -->
-    <div
-      class="bg-image"
-      style="background-image: url('assets/img/Fondos/3.svg'); height: 300px;"
-    ></div>
-
-    <!-- Tarjeta del formulario -->
-    <div class="card login-card">
-      <div class="card-body">
-        <div class="row justify-content-center">
-          <div class="col-lg-6">
-            <h2 class="title" style="color: black;">Iniciar sesión</h2>
-
-            <form @submit.prevent="handleLogin">
-              <!-- Correo -->
-              <div class="form-group input-group mb-4">
-                <span class="input-icon"><i class="fas fa-envelope"></i></span>
-                <input
-                  type="email"
-                  v-model="email"
-                  class="form-control"
-                  placeholder="Correo electrónico"
-                  required
-                />
-              </div>
-
-              <!-- Contraseña -->
-              <div class="form-group input-group mb-4">
-                <span class="input-icon"><i class="fas fa-lock"></i></span>
-                <input
-                  type="password"
-                  v-model="password"
-                  class="form-control"
-                  placeholder="Contraseña"
-                  required
-                />
-              </div>
-
-              <!-- Botón -->
-              <button class="btn btn-submit w-100 mb-3" type="submit">Ingresar</button>
-
-              <!-- Enlace a registro -->
-              <p class="text-center link-text">
-                ¿No tienes cuenta?
-                <router-link to="/register" class="link">Regístrate</router-link>
-              </p>
-            </form>
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card w-50">
+      <div class="card-body p-4">
+        <h5 class="card-title text-center">Iniciar Sesión</h5>
+        <hr />
+        <form @submit.prevent="handleLogin">
+          <div class="mb-3">
+            <label for="inputEmail" class="form-label">Correo Electrónico</label>
+            <input
+              type="email"
+              class="form-control"
+              id="inputEmail"
+              v-model="form.email"
+              placeholder="Ingrese su correo electrónico"
+              required
+            />
           </div>
-        </div>
+          <div class="mb-3">
+            <label for="inputPassword" class="form-label">Contraseña</label>
+            <input
+              type="password"
+              class="form-control"
+              id="inputPassword"
+              v-model="form.password"
+              placeholder="Ingrese su contraseña"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+          <p v-if="error" class="text-danger mt-3">{{ error }}</p>
+          <p class="mt-3 text-center">
+            ¿No tienes una cuenta? <router-link to="/register">Regístrate</router-link>
+          </p>
+        </form>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
-import eventBus from '../utils/eventBus'
+<script>
+import axios from '../axios';
+import { setToken } from '../utils/auth';
+import eventBus from '../utils/eventBus';
+import { useRouter } from 'vue-router';
 
-const email = ref('')
-const password = ref('')
-const router = useRouter()
-
-const handleLogin = async () => {
-  try {
-    const response = await axios.post('http://localhost:5282/api/auth/login', {
-      email: email.value,
-      password: password.value,
-    })
-
-    // Guardamos el token y el rol en localStorage
-    localStorage.setItem('Token', response.data.token)
-    localStorage.setItem('user_role', response.data.role)  // Guardar el rol también
-
-    eventBus.emit('authChanged')  // Notificar a la app sobre el cambio de autenticación
-    router.push('/')  // Redirigir a la página de inicio o donde sea necesario
-  } catch (err) {
-    alert('Credenciales inválidas')
-    console.error(err)
+export default {
+  name: 'LoginView',
+  setup() {
+    const router = useRouter();
+    return { router };
+  },
+  data() {
+    return {
+      form: {
+        email: '',
+        password: ''
+      },
+      error: ''
+    };
+  },
+  methods: {
+    async handleLogin() {
+      try {
+        const response = await axios.post('/auth/login', this.form);
+        setToken(response.data.token);
+        eventBus.emit('authChanged');
+        this.error = '';
+        this.form.email = '';
+        this.form.password = '';
+        this.router.push('/');
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Error al iniciar sesión';
+        console.error(error);
+      }
+    }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -184,7 +178,6 @@ const handleLogin = async () => {
   text-decoration: underline;
 }
 
-/* Responsive */
 @media (max-width: 576px) {
   .login-card {
     margin: -80px 1rem 0 1rem;

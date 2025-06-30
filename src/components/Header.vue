@@ -2,7 +2,6 @@
   <header class="site-header position-fixed top-0 w-100 z-3 bg-light shadow-sm">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid px-3">
-
         <!-- LOGO -->
         <router-link to="/" class="navbar-brand d-flex align-items-center">
           <img src="../assets/images/logo1.png" alt="Logo" height="60" class="me-2" />
@@ -24,31 +23,27 @@
         <!-- MENÚ RESPONSIVE -->
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0 text-uppercase align-items-center">
-
             <li class="nav-item">
               <router-link class="nav-link me-3" to="/">Inicio</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link me-3" to="/shop">Tienda</router-link>
             </li>
-
             <!-- BOTÓN ADMINISTRADOR SOLO PARA ADMIN -->
             <li v-if="isAdmin" class="nav-item">
               <router-link class="nav-link me-3" to="/admin">Administrador</router-link>
             </li>
-
             <!-- 🔐 Login o Perfil -->
             <li v-if="!loggedIn" class="nav-item">
               <router-link to="/login" class="btn btn-outline-dark ms-2">Ingresar</router-link>
             </li>
-
             <li v-else class="nav-item dropdown">
               <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                 <img :src="userImage" alt="Perfil" class="rounded-circle me-2" width="32" height="32" />
-                {{ userData.name }}
+                {{ userData.name || 'Usuario' }}
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li class="dropdown-item text-muted">{{ userData.email }}</li>
+                <li class="dropdown-item text-muted">{{ userData.email || 'Sin correo' }}</li>
                 <li><hr class="dropdown-divider" /></li>
                 <li><a class="dropdown-item text-danger" @click="logout">Cerrar sesión</a></li>
               </ul>
@@ -61,76 +56,68 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { jwtDecode } from 'jwt-decode'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
-import eventBus from '../utils/eventBus'
+import { ref, onMounted } from 'vue';
+import axios from '../axios';
+import { getToken, removeToken, getUser } from '../utils/auth';
+import eventBus from '../utils/eventBus';
+import { useRouter } from 'vue-router';
 
-// helpers para token
-const getToken = () => localStorage.getItem('Token')
-const removeToken = () => localStorage.removeItem('Token')
+const router = useRouter();
+const loggedIn = ref(false);
+const isAdmin = ref(false);
+const userData = ref({});
+const userImage = ref('/assets/img/FotoPerfil/default.jpg');
 
-const router = useRouter()
-const loggedIn = ref(false)
-const isAdmin = ref(false)  // Nueva variable para verificar si el usuario es admin
-const userData = ref({})
-const userImage = ref('/assets/img/FotoPerfil/default.jpg') // Imagen por defecto
-
-// función reutilizable
+// Función reutilizable
 const loadUserData = async () => {
-  const token = getToken()
-  if (!token) {
-    loggedIn.value = false
-    return
+  const user = getUser();
+  if (!user || !user.id) {
+    console.log('No user or user ID found');
+    loggedIn.value = false;
+    removeToken();
+    return;
   }
 
   try {
-    const decoded = jwtDecode(token)
+    loggedIn.value = true;
+    userData.value = {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    };
+    isAdmin.value = user.role === 'Admin';
 
-    const id = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
-    const name = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
-    const email = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
-    const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
-
-    if (!id) throw new Error('Token sin ID')
-
-    userData.value = { id, name, email }
-    loggedIn.value = true
-
-    // Verifica si el rol del usuario es "Admin"
-    isAdmin.value = role === 'Admin'
-
-    const response = await axios.get(`http://localhost:5282/api/users/${id}`)
-    const user = response.data
-    userImage.value = '/' + user.imagePath.replace(/\\/g, '/')
-
+    const response = await axios.get(`http://localhost:5282/api/users/${user.id}`);
+    const userFromApi = response.data;
+    userImage.value = '/' + userFromApi.imagePath.replace(/\\/g, '/');
   } catch (e) {
-    console.error('[ERROR] Token inválido o error al obtener imagen:', e)
-    loggedIn.value = false
-    removeToken()
+    console.error('[ERROR] Error al obtener datos del usuario:', e);
+    loggedIn.value = false;
+    removeToken();
+    userData.value = {};
+    userImage.value = '/assets/img/FotoPerfil/default.jpg';
   }
-}
+};
 
-// inicialización
+// Inicialización
 onMounted(() => {
-  loadUserData()
-})
+  loadUserData();
+});
 
-// escucha eventos desde login o logout
+// Escucha eventos desde login o logout
 eventBus.on('authChanged', () => {
-  loadUserData()
-})
+  loadUserData();
+});
 
 const logout = () => {
-  removeToken()
-  loggedIn.value = false
-  isAdmin.value = false  // Resetea el estado de admin al hacer logout
-  userData.value = {}
-  userImage.value = '/assets/img/FotoPerfil/default.jpg'
-  eventBus.emit('authChanged')
-  router.push('/')
-}
+  removeToken();
+  loggedIn.value = false;
+  isAdmin.value = false;
+  userData.value = {};
+  userImage.value = '/assets/img/FotoPerfil/default.jpg';
+  eventBus.emit('authChanged');
+  router.push('/');
+};
 </script>
 
 <style scoped>
