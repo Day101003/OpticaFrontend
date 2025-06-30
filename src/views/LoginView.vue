@@ -1,41 +1,55 @@
 <template>
-  <div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card w-50">
-      <div class="card-body p-4">
-        <h5 class="card-title text-center">Iniciar Sesión</h5>
-        <hr />
-        <form @submit.prevent="handleLogin">
-          <div class="mb-3">
-            <label for="inputEmail" class="form-label">Correo Electrónico</label>
-            <input
-              type="email"
-              class="form-control"
-              id="inputEmail"
-              v-model="form.email"
-              placeholder="Ingrese su correo electrónico"
-              required
-            />
+  <section class="login-section">
+    <!-- Imagen de fondo -->
+    <div
+      class="bg-image"
+      style="background-image: url('assets/img/Fondos/3.svg'); height: 300px;"
+    ></div>
+
+    <!-- Tarjeta del formulario -->
+    <div class="card login-card">
+      <div class="card-body">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <h5 class="card-title text-center">Iniciar Sesión</h5>
+            <hr />
+            <form @submit.prevent="handleLogin">
+              <!-- Correo -->
+              <div class="form-group input-group mb-4">
+                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                <input
+                  type="email"
+                  v-model="form.email"
+                  class="form-control"
+                  placeholder="Correo electrónico"
+                  required
+                />
+              </div>
+
+              <!-- Contraseña -->
+              <div class="form-group input-group mb-4">
+                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                <input
+                  type="password"
+                  v-model="form.password"
+                  class="form-control"
+                  placeholder="Contraseña"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+              <p v-if="error" class="text-danger mt-3">{{ error }}</p>
+              <p class="mt-3 text-center">
+                ¿No tienes una cuenta?
+                <router-link to="/register" class="link">Regístrate</router-link>
+              </p>
+            </form>
           </div>
-          <div class="mb-3">
-            <label for="inputPassword" class="form-label">Contraseña</label>
-            <input
-              type="password"
-              class="form-control"
-              id="inputPassword"
-              v-model="form.password"
-              placeholder="Ingrese su contraseña"
-              required
-            />
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
-          <p v-if="error" class="text-danger mt-3">{{ error }}</p>
-          <p class="mt-3 text-center">
-            ¿No tienes una cuenta? <router-link to="/register">Regístrate</router-link>
-          </p>
-        </form>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -105,7 +119,7 @@ export default {
   padding: 0;
 }
 
-.title {
+.card-title {
   font-weight: bold;
   margin-bottom: 1rem;
   color: var(--primary-color, #050505);
@@ -131,6 +145,8 @@ export default {
   padding: 0 0.75rem;
   color: var(--primary-color, #007bff);
   font-size: 1.1rem;
+  display: flex;
+  align-items: center;
 }
 
 .form-control {
@@ -142,7 +158,7 @@ export default {
   background-color: transparent;
 }
 
-.btn-submit {
+.btn-primary {
   background-color: var(--btn-bg, #245e79);
   border: none;
   color: var(--btn-color, white);
@@ -152,19 +168,15 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s;
   font-weight: 600;
+  width: 100%;
 }
 
-.btn-submit:hover {
+.btn-primary:hover {
   background-color: var(--btn-hover-bg, #133e52);
 }
 
 .text-center {
   text-align: center;
-}
-
-.link-text {
-  font-size: 0.95rem;
-  color: var(--text-color, #333);
 }
 
 .link {
@@ -176,6 +188,10 @@ export default {
 
 .link:hover {
   text-decoration: underline;
+}
+
+.text-danger {
+  color: #dc3545;
 }
 
 @media (max-width: 576px) {

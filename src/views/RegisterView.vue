@@ -5,6 +5,7 @@
       class="bg-image"
       style="background-image: url('assets/img/Fondos/3.svg'); height: 300px;"
     ></div>
+
     <!-- Tarjeta del formulario -->
     <div class="card register-card">
       <div class="card-body">
@@ -16,29 +17,56 @@
               <!-- Nombre -->
               <div class="form-group input-group mb-4">
                 <span class="input-icon"><i class="fas fa-user"></i></span>
-                <input type="text" v-model="name" class="form-control" placeholder="Nombre completo" required />
+                <input
+                  type="text"
+                  v-model="form.name"
+                  class="form-control"
+                  placeholder="Nombre completo"
+                  required
+                />
               </div>
 
               <!-- Correo -->
               <div class="form-group input-group mb-4">
                 <span class="input-icon"><i class="fas fa-envelope"></i></span>
-                <input type="email" v-model="email" class="form-control" placeholder="ejemplo@correo.com" required />
+                <input
+                  type="email"
+                  v-model="form.email"
+                  class="form-control"
+                  placeholder="ejemplo@correo.com"
+                  required
+                />
               </div>
 
               <!-- Teléfono -->
               <div class="form-group input-group mb-4">
                 <span class="input-icon"><i class="fas fa-phone"></i></span>
-                <input type="tel" v-model="phone" class="form-control" placeholder="8888-8888" required pattern="[0-9]{4}-[0-9]{4}" />
+                <input
+                  type="tel"
+                  v-model="form.phone"
+                  class="form-control"
+                  placeholder="8888-8888"
+                  required
+                  pattern="[0-9]{4}-[0-9]{4}"
+                />
               </div>
 
               <!-- Contraseña -->
               <div class="form-group input-group mb-4">
                 <span class="input-icon"><i class="fas fa-lock"></i></span>
-                <input type="password" v-model="password" class="form-control" placeholder="Contraseña segura" required minlength="6" />
+                <input
+                  type="password"
+                  v-model="form.password"
+                  class="form-control"
+                  placeholder="Contraseña segura"
+                  required
+                  minlength="6"
+                />
               </div>
 
-              <!-- Botón -->
               <button class="btn btn-submit w-100 mb-3" type="submit">Registrarse</button>
+
+              <p v-if="error" class="text-danger text-center">{{ error }}</p>
 
               <!-- Enlace a login -->
               <p class="text-center link-text">
@@ -54,36 +82,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import eventBus from '../utils/eventBus'
 
-const name = ref('')
-const email = ref('')
-const phone = ref('')
-const password = ref('')
+const form = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  password: ''
+})
+const error = ref('')
 const router = useRouter()
 
 const handleRegister = async () => {
+  error.value = ''
   try {
     const response = await axios.post('http://localhost:5282/api/auth/register', {
-      name: name.value,
-      email: email.value,
-      phone: phone.value,
-      password: password.value
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      password: form.password
     })
+
     localStorage.setItem('Token', response.data.token)
     eventBus.emit('authChanged')
+
+    // Limpiar formulario
+    form.name = ''
+    form.email = ''
+    form.phone = ''
+    form.password = ''
+
     router.push('/')
   } catch (err) {
-    alert('Error al registrar: ' + (err.response?.data || 'Error inesperado'))
+    error.value = err.response?.data?.message || 'Error inesperado al registrar'
     console.error(err)
   }
 }
 </script>
 
 <style scoped>
+/* Mismo CSS que ya tienes, sin cambios */
 .register-section {
   min-height: 100vh;
   background-color: var(--bg-color, #f5f5f5);
@@ -189,5 +230,10 @@ const handleRegister = async () => {
     margin: -80px 1rem 0 1rem;
     padding: 1.5rem;
   }
+}
+
+.text-danger {
+  color: #dc3545;
+  margin-top: 0.5rem;
 }
 </style>

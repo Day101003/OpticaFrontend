@@ -18,6 +18,7 @@
             <button class="btn btn-primary mr-2" @click="goToLogin">Iniciar Sesión</button>
             <button class="btn btn-secondary" @click="continueAsGuest">Continuar como Cliente</button>
           </div>
+ ♥
           <form v-if="isLoggedIn || isGuest" class="mt-3" @submit.prevent="nextStep">
             <div class="mb-3">
               <label for="inputName" class="form-label">Nombre</label>
@@ -58,7 +59,7 @@
             <button class="btn btn-primary" type="submit">Siguiente</button>
           </form>
         </div>
-        <!-- Paso 2 o Formulario de Edición: Selección de Fecha y Hora -->
+        <!-- Paso 2 o Formulario de Edición: Selección de Fecha y Hora + Mis Citas -->
         <div v-else-if="!isEditing && step === 2 || isEditing">
           <h6>{{ isEditing ? 'Editar Fecha y Hora' : 'Seleccionar Fecha y Hora' }}</h6>
           <p>Seleccione un horario disponible para su cita:</p>
@@ -81,6 +82,21 @@
             {{ isEditing ? 'Actualizar Cita' : 'Siguiente' }}
           </button>
           <p v-if="error" class="text-danger">{{ error }}</p>
+          <!-- Lista de Citas (solo para usuarios autenticados no administradores) -->
+          <div v-if="isLoggedIn && !isAdmin" class="mt-4">
+            <h5>Mis Citas</h5>
+            <div v-if="quotes.length === 0" class="alert alert-info">No hay citas agendadas.</div>
+            <div v-for="quote in quotes" :key="quote.id" class="card mb-2">
+              <div class="card-body">
+                <p>
+                  {{ quote.client.name }} - {{ formatDateTime(`${quote.availability.availableDate.split('T')[0]}T${quote.availability.hour}`) }}
+                </p>
+                <p>Notas: {{ quote.notes || 'Sin notas' }}</p>
+                <button class="btn btn-warning mr-2" @click="editQuote(quote)">Editar</button>
+                <button class="btn btn-danger" @click="deleteQuote(quote.id)">Eliminar</button>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- Paso 3: Confirmación (solo para creación) -->
         <div v-else-if="!isEditing && step === 3">
@@ -92,21 +108,6 @@
           <button class="btn btn-primary" @click="submitForm">Confirmar y Guardar</button>
           <button class="btn btn-secondary mr-2" @click="prevStep">Anterior</button>
           <p v-if="error" class="text-danger">{{ error }}</p>
-        </div>
-        <!-- Lista de Citas (solo para usuarios no administradores) -->
-        <div v-if="!isAdmin" class="mt-4">
-          <h5>Mis Citas</h5>
-          <div v-if="quotes.length === 0" class="alert alert-info">No hay citas agendadas.</div>
-          <div v-for="quote in quotes" :key="quote.id" class="card mb-2">
-            <div class="card-body">
-              <p>
-                {{ quote.client.name }} - {{ formatDateTime(`${quote.availability.availableDate.split('T')[0]}T${quote.availability.hour}`) }}
-              </p>
-              <p>Notas: {{ quote.notes || 'Sin notas' }}</p>
-              <button class="btn btn-warning mr-2" @click="editQuote(quote)">Editar</button>
-              <button class="btn btn-danger" @click="deleteQuote(quote.id)">Eliminar</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -163,33 +164,40 @@ export default {
       },
     };
   },
+  computed: {
+    isLoggedIn() {
+      return isLoggedIn();
+    },
+  },
   async created() {
-  // Verificar si es edición
-  const quoteId = this.$route.params.id;
-  if (quoteId) {
-    this.isEditing = true;
-    this.quoteId = quoteId;
-    await this.loadQuote(quoteId);
-  }
+    // Verificar si es edición
+    const quoteId = this.$route.params.id;
+    if (quoteId) {
+      this.isEditing = true;
+      this.quoteId = quoteId;
+      await this.loadQuote(quoteId);
+    }
 
-  // Verificar si el usuario es administrador
-  if (isLoggedIn()) {
-    const user = getUser();
-    this.isAdmin = user && user.role === 'Admin';
-    if (user && !this.isEditing) {
-      this.form.clientName = user.name || '';
-      this.form.clientEmail = user.email || '';
-      this.form.clientPhone = user.phone || '';
-      if (this.form.clientName && this.form.clientEmail && this.form.clientPhone) {
-        this.step = 2; // Saltar al paso 2 para creación
+    // Verificar si el usuario es administrador y llenar datos
+    if (this.isLoggedIn) {
+      const user = getUser();
+      this.isAdmin = user && user.role === 'Admin';
+      if (user && !this.isEditing) {
+        this.form.clientName = user.name || '';
+        this.form.clientEmail = user.email || '';
+        this.form.clientPhone = user.phone || '';
+        if (this.form.clientName && this.form.clientEmail && this.form.clientPhone) {
+          this.step = 2; // Saltar al paso 2 para usuarios autenticados
+        }
       }
     }
-  }
 
-  // Cargar datos
-  await this.fetchAvailableSlots();
-  await this.fetchQuotes(); // Cargar citas para todos
-},
+    // Cargar datos
+    await this.fetchAvailableSlots();
+    if (this.isLoggedIn) {
+      await this.fetchQuotes(); // Cargar citas solo para usuarios autenticados
+    }
+  },
   methods: {
     async fetchAvailableSlots() {
       try {
@@ -208,17 +216,23 @@ export default {
         }
       } catch (error) {
         this.error = 'Error al cargar horarios disponibles';
-        console.error(error);
+        console.error('Error en fetchAvailableSlots:', error);
+        if (error.response) {
+          console.error('Respuesta del servidor:', error.response.data);
+        }
       }
     },
     async fetchQuotes() {
       try {
-        const response = await axios.get('/Quotes');
-        const userEmail = isLoggedIn() ? getUser().email : this.form.clientEmail;
-        this.quotes = response.data.filter(quote => quote.isActive && (!userEmail || quote.client.email === userEmail));
+        const response = await axios.get('/Quotes/user');
+        this.quotes = response.data.filter(quote => quote.isActive);
+        console.log('Citas cargadas:', this.quotes);
       } catch (error) {
         this.error = 'Error al cargar citas';
-        console.error(error);
+        console.error('Error en fetchQuotes:', error);
+        if (error.response) {
+          console.error('Respuesta del servidor:', error.response.data);
+        }
       }
     },
     async loadQuote(quoteId) {
@@ -233,62 +247,74 @@ export default {
         this.selectedDateTime = `${quote.availability.availableDate.split('T')[0]}T${quote.availability.hour}`;
       } catch (error) {
         this.error = 'Error al cargar la cita';
-        console.error(error);
+        console.error('Error en loadQuote:', error);
+        if (error.response) {
+          console.error('Respuesta del servidor:', error.response.data);
+        }
         alert('No se pudo cargar la cita.');
       }
     },
     async submitForm() {
-  try {
-    // Validar datos
-    if (!this.form.clientName || !this.form.clientEmail || !this.form.clientPhone || !this.form.availabilityId) {
-      this.error = 'Por favor, complete todos los campos requeridos.';
-      return;
-    }
+      try {
+        // Validar datos
+        if (!this.form.clientName || !this.form.clientEmail || !this.form.clientPhone || !this.form.availabilityId) {
+          this.error = 'Por favor, complete todos los campos requeridos.';
+          return;
+        }
 
-    const payload = {
-      clientName: this.form.clientName,
-      clientEmail: this.form.clientEmail,
-      clientPhone: this.form.clientPhone,
-      availabilityId: this.form.availabilityId,
-      notes: this.form.notes,
-    };
+        const payload = {
+          clientName: this.form.clientName,
+          clientEmail: this.form.clientEmail,
+          clientPhone: this.form.clientPhone,
+          availabilityId: this.form.availabilityId,
+          notes: this.form.notes,
+        };
 
-    if (this.isEditing) {
-      await axios.put(`/Quotes/${this.quoteId}`, payload);
-      alert('Cita actualizada con éxito');
-    } else {
-      await axios.post('/Quotes', payload);
-      alert('Cita agendada con éxito');
-    }
+        let response;
+        if (this.isEditing) {
+          response = await axios.put(`/Quotes/${this.quoteId}`, payload);
+          console.log('Respuesta de actualizar cita:', response.data);
+          alert('Cita actualizada con éxito');
+        } else {
+          response = await axios.post('/Quotes', payload);
+          console.log('Respuesta de crear cita:', response.data);
+          alert('Cita agendada con éxito');
+        }
 
-    // Limpiar formulario
-    this.form = {
-      clientName: isLoggedIn() ? getUser().name || '' : '',
-      clientEmail: isLoggedIn() ? getUser().email || '' : '',
-      clientPhone: isLoggedIn() ? getUser().phone || '' : '',
-      availabilityId: '',
-      notes: '',
-    };
-    this.isGuest = false;
-    this.step = 1;
-    this.error = '';
-    this.selectedDateTime = null;
+        // Limpiar formulario
+        const user = this.isLoggedIn ? getUser() : null;
+        this.form = {
+          clientName: user ? user.name || '' : '',
+          clientEmail: user ? user.email || '' : '',
+          clientPhone: user ? user.phone || '' : '',
+          availabilityId: '',
+          notes: '',
+        };
+        this.isGuest = false;
+        this.step = this.isLoggedIn ? 2 : 1;
+        this.error = '';
+        this.selectedDateTime = null;
 
-    // Refrescar datos
-    await this.fetchAvailableSlots();
-    await this.fetchQuotes(); // Cargar citas para todos, incluidos administradores
+        // Refrescar datos
+        await this.fetchAvailableSlots();
+        if (this.isLoggedIn) {
+          await this.fetchQuotes();
+        }
 
-    // Redirigir: para edición, los admins van a /admin; para creación, todos permanecen en /appointment
-    if (this.isEditing && this.isAdmin) {
-      this.$router.push('/admin');
-    } else {
-      this.$router.push('/appointment');
-    }
-  } catch (error) {
-    this.error = error.response?.data?.message || 'Error al guardar la cita';
-    console.error(error);
-  }
-},
+        // Redirigir
+        if (this.isEditing && this.isAdmin) {
+          this.$router.push('/admin');
+        } else {
+          this.$router.push('/appointment');
+        }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Error al guardar la cita';
+        console.error('Error en submitForm:', error);
+        if (error.response) {
+          console.error('Respuesta del servidor:', error.response.data);
+        }
+      }
+    },
     async editQuote(quote) {
       this.isEditing = true;
       this.quoteId = quote.id;
@@ -300,19 +326,23 @@ export default {
         notes: quote.notes,
       };
       this.selectedDateTime = `${quote.availability.availableDate.split('T')[0]}T${quote.availability.hour}`;
-      this.step = 2; // Mostrar directamente el formulario de edición
+      this.step = 2;
     },
     async deleteQuote(id) {
       if (confirm('¿Confirmar eliminación de cita?')) {
         try {
-          await axios.delete(`/Quotes/${id}`);
+          const response = await axios.delete(`/Quotes/${id}`);
+          console.log('Respuesta de deleteQuote:', response.status);
           this.error = '';
           await this.fetchQuotes();
           await this.fetchAvailableSlots();
           alert('Cita eliminada con éxito');
         } catch (error) {
           this.error = error.response?.data?.message || 'Error al eliminar cita';
-          console.error(error);
+          console.error('Error en deleteQuote:', error);
+          if (error.response) {
+            console.error('Respuesta del servidor:', error.response.data);
+          }
         }
       }
     },
